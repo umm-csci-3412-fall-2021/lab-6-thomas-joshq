@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.io.*;
 import java.net.*;
 
-import javax.sound.sampled.SourceDataLine;
 
 public class EchoClient{
 	public static final int PORT_NUMBER = 6013;

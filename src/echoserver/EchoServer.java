@@ -1,36 +1,66 @@
 package echoserver;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-
+  
 public class EchoServer {
-	
-	// REPLACE WITH PORT PROVIDED BY THE INSTRUCTOR
+
 	public static final int PORT_NUMBER = 6013; 
-	public static void main(String[] args) throws IOException, InterruptedException {
-		EchoServer server = new EchoServer();
-		server.start();
+    public static void main(String[] args)
+    {
+        ServerSocket serverSocket = null;
+  
+        try {
+  
+            serverSocket = new ServerSocket(PORT_NUMBER);
+            serverSocket.setReuseAddress(true);
+  
+            while (true) {
+                Socket client = serverSocket.accept();
+                ClientHandler clientSock = new ClientHandler(client);
+                new Thread(clientSock).start();
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (serverSocket != null) {
+                try {
+                    serverSocket.close();
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
+
+class ClientHandler implements Runnable {
+	private final Socket clientSocket;
+	public ClientHandler(Socket socket)
+	{
+		this.clientSocket = socket;
 	}
 
-	private void start() throws IOException, InterruptedException {
-		ServerSocket serverSocket = new ServerSocket(PORT_NUMBER);
-		while (true) {
-			Socket client = serverSocket.accept();
-			InputStream input = client.getInputStream();
-			OutputStream output = client.getOutputStream();
-	
+	public void run()
+	{
+		try {
+			OutputStream out = clientSocket.getOutputStream();
+			InputStream in = clientSocket.getInputStream();
+
 			int bytesRead;
-			while ((bytesRead = input.read()) != -1) {
-			  output.write(bytesRead);
-			  output.flush();
+			while ((bytesRead = in.read()) != -1) {
+			  out.write(bytesRead);
+			  out.flush();
 			}
-			input.close();
-			output.close();
-	
-			client.close();
-		  }
+			clientSocket.close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
